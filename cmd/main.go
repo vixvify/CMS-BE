@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-dsn := "host=localhost user=postgres password=1234 dbname=test port=5432 sslmode=disable"
+dsn := "postgresql://neondb_owner:npg_IBw2KUA5RYpz@ep-winter-morning-ahd31e69-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect database:", err)
