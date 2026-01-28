@@ -1,12 +1,16 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type User struct {
-	ID        uint      `gorm:"primaryKey"`
+	ID        uuid.UUID     `gorm:"type:uuid;primaryKey" json:"id"`
 	Email     string
 	Password  string
 	Username  string
-	CreatedAt time.Time `gorm:"type:timestamp"`
+	CreatedAt time.Time `json:"created_at"`
 	Blogs     []Blog    `gorm:"foreignKey:UserID"`
 }

@@ -17,6 +17,6 @@ func (s *BlogService) GetBlog() ([]domain.Blog, error) {
 	return s.repo.FindAll()
 }
 
-func (s *BlogService) CreateBlog(blog domain.Blog) error {
+func (s *BlogService) CreateBlog(blog domain.Blog) (domain.Blog, error)  {
 	return s.repo.Create(blog)
 }

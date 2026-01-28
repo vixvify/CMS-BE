@@ -27,14 +27,10 @@ func (h *BlogHandler) GetBlog(c *gin.Context) {
 
 func (h *BlogHandler) CreateBlog(c *gin.Context) {
 	var blog domain.Blog
-	if err := c.ShouldBindJSON(&blog); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := h.service.CreateBlog(blog); err != nil {
+	created, err := h.service.CreateBlog(blog)
+	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(201, blog)
+	c.JSON(201, created)
 }

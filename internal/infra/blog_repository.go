@@ -4,6 +4,7 @@ import (
 	"server/internal/domain"
 	"server/internal/repository"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -21,6 +22,8 @@ func (r *BlogRepoGorm) FindAll() ([]domain.Blog, error) {
 	return blogs, err
 }
 
-func (r *BlogRepoGorm) Create(blog domain.Blog) error {
-	return r.db.Create(&blog).Error
+func (r *BlogRepoGorm) Create(blog domain.Blog) (domain.Blog, error) {
+	blog.ID = uuid.New() 
+	err := r.db.Create(&blog).Error
+	return blog, err
 }
