@@ -9,6 +9,7 @@ import (
 
 	"server/internal/handler"
 	"server/internal/infra"
+	"server/internal/route"
 	"server/internal/service"
 )
 
@@ -24,8 +25,8 @@ dsn := "postgresql://neondb_owner:npg_IBw2KUA5RYpz@ep-winter-morning-ahd31e69-po
 	blogHandler := handler.NewBlogHandler(blogService)
 
 	r := gin.Default()
-	r.GET("/blog", blogHandler.GetBlog)
-	r.POST("/blog", blogHandler.CreateBlog)
+	api := r.Group("/api")
+	route.RegisterUserRoutes(api.Group("/blog"), blogHandler)
 
 	r.Run(":8080")
 

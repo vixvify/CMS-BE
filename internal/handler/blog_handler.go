@@ -32,7 +32,7 @@ func (h *BlogHandler) CreateBlog(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.CreatBlog(blog); err != nil {
+	if err := h.service.CreateBlog(blog); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
