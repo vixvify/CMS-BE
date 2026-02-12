@@ -2,10 +2,12 @@ package handler
 
 import (
 	"net/http"
-	"server/internal/domain"
+	"server/internal/dto"
+	"server/internal/models"
 	"server/internal/service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type BlogHandler struct {
@@ -17,16 +19,24 @@ func NewBlogHandler(s *service.BlogService) *BlogHandler {
 }
 
 func (h *BlogHandler) GetBlog(c *gin.Context) {
-	users, err := h.service.GetBlog()
+	blogs, err := h.service.GetBlog()
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, blogs)
 }
 
 func (h *BlogHandler) CreateBlog(c *gin.Context) {
-	var blog domain.Blog
+	var blog models.Blog
+
+	if err := c.ShouldBindJSON(&blog); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	created, err := h.service.CreateBlog(blog)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
@@ -34,3 +44,45 @@ func (h *BlogHandler) CreateBlog(c *gin.Context) {
 	}
 	c.JSON(201, created)
 }
+
+func (h *BlogHandler) UpdateBlog(c *gin.Context) {
+	var updatedblog dto.UpdateBlogRequest
+	idStr := c.Param("id")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+    	c.JSON(400, gin.H{"error": "invalid id"})
+    	return
+	}
+
+	if err := c.ShouldBindJSON(&updatedblog); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	updated, err := h.service.UpdateBlog(id,updatedblog)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, updated)
+}	
+
+func (h *BlogHandler) DeleteBlog(c *gin.Context) {
+	idStr := c.Param("id")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+    	c.JSON(400, gin.H{"error": "invalid id"})
+    	return
+	}
+
+	err = h.service.DeleteBlog(id)
+	if err := h.service.DeleteBlog(id); err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.Status(204)
+}	
