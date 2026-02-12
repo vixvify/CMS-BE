@@ -3,7 +3,6 @@ package handler
 import (
 	"net/http"
 	"server/internal/dto"
-	"server/internal/models"
 	"server/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +27,7 @@ func (h *BlogHandler) GetBlog(c *gin.Context) {
 }
 
 func (h *BlogHandler) CreateBlog(c *gin.Context) {
-	var blog models.Blog
+	var blog dto.CreateBlogRequest
 
 	if err := c.ShouldBindJSON(&blog); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

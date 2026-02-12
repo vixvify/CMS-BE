@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	database.Connect()
 	blogRepo := infra.NewBlogRepoGorm(database.DB)
 	blogService := service.NewBlogService(blogRepo)
 	blogHandler := handler.NewBlogHandler(blogService)

@@ -1,9 +1,9 @@
 package infra
 
 import (
-	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repository"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -25,11 +25,12 @@ func (r *BlogRepoGorm) FindAll() ([]models.Blog, error) {
 
 func (r *BlogRepoGorm) Create(blog models.Blog) (models.Blog, error) {
 	blog.ID = uuid.New() 
+	blog.CreatedAt = time.Now()
 	err := r.db.Create(&blog).Error
 	return blog, err
 }
 
-func (r *BlogRepoGorm) Update(id uuid.UUID,updatedBlog dto.UpdateBlogRequest) (models.Blog, error) {
+func (r *BlogRepoGorm) Update(id uuid.UUID,updatedBlog models.Blog) (models.Blog, error) {
 	if err := r.db.
 		Model(&models.Blog{}).
 		Where("id = ?", id).

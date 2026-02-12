@@ -4,6 +4,7 @@ import (
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repository"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -20,12 +21,25 @@ func (s *BlogService) GetBlog() ([]models.Blog, error) {
 	return s.repo.FindAll()
 }
 
-func (s *BlogService) CreateBlog(blog models.Blog) (models.Blog, error)  {
+func (s *BlogService) CreateBlog(req dto.CreateBlogRequest) (models.Blog, error)  {
+	blog := models.Blog{
+		Title:   req.Title,
+		Content: req.Content,
+		Author:  req.Author,
+	}
+
+	blog.ID = uuid.New()
+	blog.CreatedAt = time.Now()
 	return s.repo.Create(blog)
 }
 
-func (s *BlogService) UpdateBlog(id uuid.UUID, updatedblog dto.UpdateBlogRequest) (models.Blog, error)  {
-	return s.repo.Update(id,updatedblog)
+func (s *BlogService) UpdateBlog(id uuid.UUID, req dto.UpdateBlogRequest) (models.Blog, error)  {
+	blog := models.Blog{
+		Title: req.Title,
+		Content: req.Content,
+		Author: req.Author,
+	}
+	return s.repo.Update(id,blog)
 }
 
 func (s *BlogService) DeleteBlog(id uuid.UUID) (error)  {
