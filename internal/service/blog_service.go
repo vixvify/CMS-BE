@@ -23,13 +23,12 @@ func (s *BlogService) GetBlog() ([]models.Blog, error) {
 
 func (s *BlogService) CreateBlog(req dto.CreateBlogRequest) (models.Blog, error)  {
 	blog := models.Blog{
+		ID: uuid.New(),
 		Title:   req.Title,
 		Content: req.Content,
 		Author:  req.Author,
+		CreatedAt: time.Now(),
 	}
-
-	blog.ID = uuid.New()
-	blog.CreatedAt = time.Now()
 	return s.repo.Create(blog)
 }
 

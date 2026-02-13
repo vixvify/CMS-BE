@@ -3,7 +3,6 @@ package infra
 import (
 	"server/internal/models"
 	"server/internal/repository"
-	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -24,8 +23,6 @@ func (r *BlogRepoGorm) FindAll() ([]models.Blog, error) {
 }
 
 func (r *BlogRepoGorm) Create(blog models.Blog) (models.Blog, error) {
-	blog.ID = uuid.New() 
-	blog.CreatedAt = time.Now()
 	err := r.db.Create(&blog).Error
 	return blog, err
 }
