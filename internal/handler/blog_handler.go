@@ -23,7 +23,11 @@ func (h *BlogHandler) GetBlog(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, blogs)
+	c.JSON(http.StatusOK, gin.H{
+		"data": blogs,
+		"status": "success",
+		"statusCode": 200,
+	})
 }
 
 func (h *BlogHandler) CreateBlog(c *gin.Context) {

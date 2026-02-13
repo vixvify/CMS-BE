@@ -28,6 +28,7 @@ func (s *BlogService) CreateBlog(req dto.CreateBlogRequest) (models.Blog, error)
 		Content: req.Content,
 		Author:  req.Author,
 		CreatedAt: time.Now(),
+		UserID: req.UserID,
 	}
 	return s.repo.Create(blog)
 }
