@@ -4,6 +4,7 @@ import (
 	"server/internal/models"
 	"server/internal/repository"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -24,6 +25,17 @@ func (r *AuthRepoGorm) FindByEmail(email string) (models.User, error) {
 	var user models.User
 
 	err := r.db.Where("email = ?",email).First(&user).Error
+	if err != nil {
+		return models.User{}, err
+	}
+
+	return user,nil
+}
+
+func (r *AuthRepoGorm) FindByID(userID uuid.UUID) (models.User, error) {
+	var user models.User
+
+	err := r.db.Where("id = ?",userID).First(&user).Error
 	if err != nil {
 		return models.User{}, err
 	}

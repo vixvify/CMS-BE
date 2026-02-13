@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"server/internal/dto"
 	"server/internal/service"
@@ -62,7 +63,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		MaxAge:   3600,
 		HttpOnly: true,
 		Secure:   false, 
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSiteLaxMode,
 	})
 
 	c.JSON(200, gin.H{
@@ -73,5 +74,49 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		},
 		"status": "success",
 		"statusCode": 200,
+	})
+}
+
+func (h *AuthHandler) Me(c *gin.Context) {
+fmt.Println("X-FROM:", c.GetHeader("x-from"))
+	cookie, err := c.Request.Cookie("access_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status": "unauthorized",
+			"statusCode": 201,
+		})
+		return
+	}
+
+	user, err := h.service.Me(cookie.Value)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status": "unauthorized",
+			"statusCode": 201,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": user,
+		"status": "success",
+		"statusCode": 200,
+	})
+}
+
+func (h *AuthHandler) Logout(c *gin.Context) {
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
 	})
 }
