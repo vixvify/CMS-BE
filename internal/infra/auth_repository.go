@@ -3,7 +3,6 @@ package infra
 import (
 	"server/internal/models"
 	"server/internal/repository"
-	"server/internal/util"
 
 	"gorm.io/gorm"
 )
@@ -17,22 +16,18 @@ func NewAuthRepoGorm(db *gorm.DB) repository.AuthRepository {
 }
 
 func (r *AuthRepoGorm) Signup(data models.User) (models.User, error) {
-	var user models.User
-	err := r.db.Create(&user).Error
-	return user, err
+	err := r.db.Create(&data).Error
+	return data, err
 }
 
-func (r *AuthRepoGorm) Login(data models.User) (models.User, error) {
+func (r *AuthRepoGorm) FindByEmail(email string) (models.User, error) {
 	var user models.User
 
-	err := r.db.Where("email = ?",data.Email).First(&user).Error
+	err := r.db.Where("email = ?",email).First(&user).Error
 	if err != nil {
 		return models.User{}, err
 	}
-	
-	if !util.CheckPassword(user.Password, data.Password) {
-		return models.User{}, err
-	}
+
 	return user,nil
 }
 

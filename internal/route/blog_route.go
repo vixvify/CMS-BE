@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterUserRoutes(r *gin.RouterGroup, h *handler.BlogHandler) {
+func RegisterBlogRoutes(r *gin.RouterGroup, h *handler.BlogHandler) {
 	r.Use(middleware.RateLimitMiddleware())
 	r.GET("", h.GetBlog)
 	r.POST("", h.CreateBlog)

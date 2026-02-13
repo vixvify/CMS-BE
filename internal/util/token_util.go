@@ -6,7 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func generateAccessToken(userID string, secret string) (string, error) {
+func GenerateAccessToken(userID string, secret string) (string, error) {
 
 	claims := jwt.MapClaims{
 		"sub": userID,

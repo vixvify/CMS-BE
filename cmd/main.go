@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"server/internal/database"
 	"server/internal/handler"
 	"server/internal/infra"
@@ -17,6 +18,10 @@ func main() {
 	blogService := service.NewBlogService(blogRepo)
 	blogHandler := handler.NewBlogHandler(blogService)
 
+	authRepo := infra.NewAuthRepoGorm(database.DB)
+	authService := service.NewAuthService(authRepo,os.Getenv("JWT_SECRET"),)
+	authHandler := handler.NewAuthHandler(authService)
+
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
@@ -26,7 +31,8 @@ func main() {
 	}))
 
 	api := r.Group("/api")
-	route.RegisterUserRoutes(api.Group("/blog"), blogHandler)
+	route.RegisterBlogRoutes(api.Group("/blog"), blogHandler)
+	route.RegisterAuthRoutes(api.Group("/auth"), authHandler)
 
 	r.Run(":8080")
 

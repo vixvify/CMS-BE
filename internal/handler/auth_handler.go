@@ -31,7 +31,12 @@ func (h *AuthHandler) Signup(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(201, created)
+	c.JSON(201, gin.H{
+		"data": created,
+		"status": "success",
+		"statusCode": 201,
+	})
+
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
@@ -44,13 +49,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.Login(data)
+	user,token, err := h.service.Login(data)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
-	token := "xxx"
 
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "access_token",
@@ -58,9 +61,17 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Path:     "/",
 		MaxAge:   3600,
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   false, 
 		SameSite: http.SameSiteNoneMode,
 	})
 
-	c.JSON(200, user)
+	c.JSON(200, gin.H{
+  		"data": dto.LoginResponse{
+			ID:       user.ID,
+			Email:    user.Email,
+			Username: user.Username,
+		},
+		"status": "success",
+		"statusCode": 200,
+	})
 }

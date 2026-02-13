@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repository"
@@ -12,11 +13,16 @@ import (
 
 type AuthService struct {
 	repo repository.AuthRepository
+	jwtSecret string
 }
 
-func NewAuthService(r repository.AuthRepository) *AuthService {
-	return &AuthService{repo: r}
+func NewAuthService(r repository.AuthRepository,jwtSecret string,) *AuthService {
+	return &AuthService{
+		repo: r,
+		jwtSecret: jwtSecret,
+	}
 }
+
 
 func (s *AuthService) Signup(req dto.SignupRequest) (models.User, error) {
 	hashed,err := util.HashPassword(req.Password)
@@ -33,10 +39,20 @@ func (s *AuthService) Signup(req dto.SignupRequest) (models.User, error) {
 	return s.repo.Signup(user)
 }
 
-func (s *AuthService) Login(req dto.LoginRequest) (models.User, error)  {
-	user := models.User{
-		Email: req.Email,
-		Password: req.Password,
+func (s *AuthService) Login(req dto.LoginRequest) (models.User,string, error)  {
+	user,err := s.repo.FindByEmail(req.Email)
+	if(err != nil){
+		return models.User{},"",err
 	}
-	return s.repo.Login(user)
+	if !util.CheckPassword(user.Password, req.Password) {
+		return models.User{},"", errors.New("invalid credentials")
+	}
+	token, err := util.GenerateAccessToken(
+		user.ID.String(),
+		s.jwtSecret,
+	)
+	if err != nil {
+		return models.User{},"", err
+	}
+	return user,token,nil
 }
