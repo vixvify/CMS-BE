@@ -15,6 +15,7 @@ import (
 func main() {
 	database.Connect()
 	jwtSecret := os.Getenv("JWT_SECRET")
+	PORT := os.Getenv("PORT")
 	
 	authRepo := infra.NewAuthRepoGorm(database.DB)
 	authService := service.NewAuthService(authRepo,jwtSecret,)
@@ -36,6 +37,6 @@ func main() {
 	route.RegisterBlogRoutes(api.Group("/blog"), blogHandler,jwtSecret)
 	route.RegisterAuthRoutes(api.Group("/auth"), authHandler)
 
-	r.Run(":8080")
+	r.Run(":"+PORT)
 
 }
