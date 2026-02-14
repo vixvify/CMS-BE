@@ -11,6 +11,6 @@ func RegisterBlogRoutes(r *gin.RouterGroup, h *handler.BlogHandler, jwtSecret st
 	r.Use(middleware.RateLimitMiddleware())
 	r.GET("", h.GetBlog)
 	r.POST("", middleware.JWTAuth(jwtSecret), h.CreateBlog)
-	r.PUT("", middleware.JWTAuth(jwtSecret),h.UpdateBlog)
-	r.DELETE("", middleware.JWTAuth(jwtSecret),h.DeleteBlog)
+	r.PUT("/:id", middleware.JWTAuth(jwtSecret),h.UpdateBlog)
+	r.DELETE("/:id", middleware.JWTAuth(jwtSecret),h.DeleteBlog)
 }

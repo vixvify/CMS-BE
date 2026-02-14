@@ -22,6 +22,12 @@ func (r *BlogRepoGorm) FindAll() ([]models.Blog, error) {
 	return blogs, err
 }
 
+func (r *BlogRepoGorm) FindByID(id uuid.UUID) (models.Blog, error) {
+	var blog models.Blog
+	err := r.db.Where("id = ?",id).First(&blog).Error
+	return blog, err
+}
+
 func (r *BlogRepoGorm) Create(blog models.Blog) (models.Blog, error) {
 	err := r.db.Create(&blog).Error
 	return blog, err

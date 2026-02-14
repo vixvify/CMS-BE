@@ -15,14 +15,15 @@ import (
 func main() {
 	database.Connect()
 	jwtSecret := os.Getenv("JWT_SECRET")
-	blogRepo := infra.NewBlogRepoGorm(database.DB)
-	blogService := service.NewBlogService(blogRepo)
-	blogHandler := handler.NewBlogHandler(blogService)
-
+	
 	authRepo := infra.NewAuthRepoGorm(database.DB)
 	authService := service.NewAuthService(authRepo,jwtSecret,)
 	authHandler := handler.NewAuthHandler(authService)
-
+	blogRepo := infra.NewBlogRepoGorm(database.DB)
+	
+	blogService := service.NewBlogService(blogRepo)
+	blogHandler := handler.NewBlogHandler(blogService)
+	
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},

@@ -77,7 +77,19 @@ func (h *BlogHandler) UpdateBlog(c *gin.Context) {
 		return
 	}
 
-	updated, err := h.service.UpdateBlog(id,updatedblog)
+	userIDStr, exists := c.Get("userID")
+    if !exists {
+        c.JSON(401, gin.H{"error": "unauthorized"})
+        return
+    }
+
+    userID, err := uuid.Parse(userIDStr.(string))
+    if err != nil {
+        c.JSON(400, gin.H{"error": "invalid user id"})
+        return
+    }
+
+	updated, err := h.service.UpdateBlog(id,updatedblog,userID)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -94,8 +106,19 @@ func (h *BlogHandler) DeleteBlog(c *gin.Context) {
     	return
 	}
 
-	err = h.service.DeleteBlog(id)
-	if err := h.service.DeleteBlog(id); err != nil {
+	userIDStr, exists := c.Get("userID")
+    if !exists {
+        c.JSON(401, gin.H{"error": "unauthorized"})
+        return
+    }
+
+    userID, err := uuid.Parse(userIDStr.(string))
+    if err != nil {
+        c.JSON(400, gin.H{"error": "invalid user id"})
+        return
+    }
+
+	if err := h.service.DeleteBlog(id,userID); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}

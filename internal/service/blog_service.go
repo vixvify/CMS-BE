@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repository"
@@ -33,7 +34,15 @@ func (s *BlogService) CreateBlog(req dto.CreateBlogRequest,userID uuid.UUID) (mo
 	return s.repo.Create(blog)
 }
 
-func (s *BlogService) UpdateBlog(id uuid.UUID, req dto.UpdateBlogRequest) (models.Blog, error)  {
+func (s *BlogService) UpdateBlog(id uuid.UUID, req dto.UpdateBlogRequest,userID uuid.UUID) (models.Blog, error)  {
+	blogbyid, err := s.repo.FindByID(id)
+	if err != nil {
+		return models.Blog{}, err
+	}
+
+	if userID != blogbyid.UserID {
+		return models.Blog{} ,errors.New("forbidden")
+	}
 	
 	blog := models.Blog{
 		Title: req.Title,
@@ -43,6 +52,15 @@ func (s *BlogService) UpdateBlog(id uuid.UUID, req dto.UpdateBlogRequest) (model
 	return s.repo.Update(id,blog)
 }
 
-func (s *BlogService) DeleteBlog(id uuid.UUID) (error)  {
+func (s *BlogService) DeleteBlog(id uuid.UUID,userID uuid.UUID) (error)  {
+	blogbyid, err := s.repo.FindByID(id)
+	if err != nil {
+		return err
+	}
+
+	if userID != blogbyid.UserID {
+		return errors.New("forbidden")
+	}
+	
 	return s.repo.Delete(id)
 }

@@ -9,6 +9,7 @@ import (
 
 type BlogRepository interface {
 	FindAll() ([]models.Blog, error)
+	FindByID(id uuid.UUID) (models.Blog, error)
 	Create(blog models.Blog) (models.Blog, error)
 	Update(id uuid.UUID,updatedBlog models.Blog)  (models.Blog, error)
 	Delete(id uuid.UUID)  (error)
