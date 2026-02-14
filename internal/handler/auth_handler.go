@@ -59,10 +59,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Name:     "access_token",
 		Value:    token,
 		Path:     "/",
+		Domain:   "blog-app-go.onrender.com",
 		MaxAge:   3600,
 		HttpOnly: true,
-		Secure:   false, 
-		SameSite: http.SameSiteLaxMode,
+		Secure:   true, 
+		SameSite: http.SameSiteNoneMode,
 	})
 
 	c.JSON(200, gin.H{
@@ -108,10 +109,11 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		Name:     "access_token",
 		Value:    "",
 		Path:     "/",
+		Domain:   "blog-app-go.onrender.com",
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
 	})
 
 	c.JSON(http.StatusOK, gin.H{
