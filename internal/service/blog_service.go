@@ -22,6 +22,10 @@ func (s *BlogService) GetBlog() ([]models.Blog, error) {
 	return s.repo.FindAll()
 }
 
+func (s *BlogService) GetBlogByID(id uuid.UUID) (models.Blog, error) {
+	return s.repo.FindByID(id)
+}
+
 func (s *BlogService) CreateBlog(req dto.CreateBlogRequest,userID uuid.UUID) (models.Blog, error)  {
 	blog := models.Blog{
 		ID: uuid.New(),

@@ -30,6 +30,27 @@ func (h *BlogHandler) GetBlog(c *gin.Context) {
 	})
 }
 
+func (h *BlogHandler) GetBlogByID(c *gin.Context) {
+	idStr := c.Param("id")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+    	c.JSON(400, gin.H{"error": "invalid id"})
+    	return
+	}
+
+	blog, err := h.service.GetBlogByID(id)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data": blog,
+		"status": "success",
+		"statusCode": 200,
+	})
+}
+
 func (h *BlogHandler) CreateBlog(c *gin.Context) {
 	var blog dto.CreateBlogRequest
 
