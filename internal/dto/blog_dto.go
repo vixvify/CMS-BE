@@ -6,7 +6,7 @@ type CreateBlogRequest struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
 	Author  string `json:"author"`
-	UserID  uuid.UUID `json:"userId"`
+	UserID  uuid.UUID `json:"user_id"`
 }
 
 type UpdateBlogRequest struct {

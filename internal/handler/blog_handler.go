@@ -40,7 +40,19 @@ func (h *BlogHandler) CreateBlog(c *gin.Context) {
 		return
 	}
 
-	created, err := h.service.CreateBlog(blog)
+	userIDStr, exists := c.Get("userID")
+    if !exists {
+        c.JSON(401, gin.H{"error": "unauthorized"})
+        return
+    }
+
+    userID, err := uuid.Parse(userIDStr.(string))
+    if err != nil {
+        c.JSON(400, gin.H{"error": "invalid user id"})
+        return
+    }
+
+	created, err := h.service.CreateBlog(blog,userID)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
