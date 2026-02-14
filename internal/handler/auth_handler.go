@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"server/internal/dto"
 	"server/internal/service"
@@ -78,7 +77,6 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 func (h *AuthHandler) Me(c *gin.Context) {
-fmt.Println("X-FROM:", c.GetHeader("x-from"))
 	cookie, err := c.Request.Cookie("access_token")
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{

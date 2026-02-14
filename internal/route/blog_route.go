@@ -7,10 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterBlogRoutes(r *gin.RouterGroup, h *handler.BlogHandler) {
+func RegisterBlogRoutes(r *gin.RouterGroup, h *handler.BlogHandler, jwtSecret string) {
 	r.Use(middleware.RateLimitMiddleware())
 	r.GET("", h.GetBlog)
-	r.POST("", h.CreateBlog)
-	r.PUT("",h.UpdateBlog)
-	r.DELETE("",h.DeleteBlog)
+	r.POST("", middleware.JWTAuth(jwtSecret), h.CreateBlog)
+	r.PUT("", middleware.JWTAuth(jwtSecret),h.UpdateBlog)
+	r.DELETE("", middleware.JWTAuth(jwtSecret),h.DeleteBlog)
 }

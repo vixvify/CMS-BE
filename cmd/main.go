@@ -14,12 +14,13 @@ import (
 
 func main() {
 	database.Connect()
+	jwtSecret := os.Getenv("JWT_SECRET")
 	blogRepo := infra.NewBlogRepoGorm(database.DB)
 	blogService := service.NewBlogService(blogRepo)
 	blogHandler := handler.NewBlogHandler(blogService)
 
 	authRepo := infra.NewAuthRepoGorm(database.DB)
-	authService := service.NewAuthService(authRepo,os.Getenv("JWT_SECRET"),)
+	authService := service.NewAuthService(authRepo,jwtSecret,)
 	authHandler := handler.NewAuthHandler(authService)
 
 	r := gin.Default()
@@ -31,7 +32,7 @@ func main() {
 	}))
 
 	api := r.Group("/api")
-	route.RegisterBlogRoutes(api.Group("/blog"), blogHandler)
+	route.RegisterBlogRoutes(api.Group("/blog"), blogHandler,jwtSecret)
 	route.RegisterAuthRoutes(api.Group("/auth"), authHandler)
 
 	r.Run(":8080")
