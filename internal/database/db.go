@@ -2,6 +2,7 @@ package database
 
 import (
 	"log"
+	"os"
 	"server/internal/models"
 
 	"gorm.io/driver/postgres"
@@ -11,12 +12,12 @@ import (
 var DB *gorm.DB
 
 func Connect() {
-	dsn := "postgresql://neondb_owner:npg_IBw2KUA5RYpz@ep-winter-morning-ahd31e69-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+	url := os.Getenv("DATABASE_URL")
 
 	db, err := gorm.Open(
 		postgres.New(postgres.Config{
-			DSN:                  dsn,
-			PreferSimpleProtocol: true, 
+			DSN:                  url,
+			PreferSimpleProtocol: true,
 		}),
 		&gorm.Config{},
 	)

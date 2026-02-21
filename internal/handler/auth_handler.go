@@ -3,6 +3,8 @@ package handler
 import (
 	"net/http"
 	"server/internal/dto"
+	"server/internal/mapper"
+	"server/internal/response"
 	"server/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -20,22 +22,16 @@ func (h *AuthHandler) Signup(c *gin.Context) {
 	var data dto.SignupRequest
 
 	if err := c.ShouldBindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		response.BadRequest(c, err.Error())
 		return
 	}
 
 	created, err := h.service.Signup(data)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		response.Internal(c, err.Error())
 		return
 	}
-	c.JSON(201, gin.H{
-		"data": created,
-		"status": "success",
-		"statusCode": 201,
-	})
+	response.OK(c, mapper.ToUserResponse(created))
 
 }
 
@@ -43,15 +39,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	var data dto.LoginRequest
 
 	if err := c.ShouldBindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		response.BadRequest(c, err.Error())
 		return
 	}
 
-	user,token, err := h.service.Login(data)
+	_, token, err := h.service.Login(data)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		response.Internal(c, err.Error())
 		return
 	}
 
@@ -62,45 +56,27 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Domain:   "blog-app-go.onrender.com",
 		MaxAge:   3600,
 		HttpOnly: true,
-		Secure:   true, 
+		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
 	})
 
-	c.JSON(200, gin.H{
-  		"data": dto.LoginResponse{
-			ID:       user.ID,
-			Email:    user.Email,
-			Username: user.Username,
-		},
-		"status": "success",
-		"statusCode": 200,
-	})
+	response.OK(c, nil)
 }
 
 func (h *AuthHandler) Me(c *gin.Context) {
 	cookie, err := c.Request.Cookie("access_token")
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"status": "unauthorized",
-			"statusCode": 201,
-		})
+		response.Unauthorized(c, "Unauthorized")
 		return
 	}
 
 	user, err := h.service.Me(cookie.Value)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"status": "unauthorized",
-			"statusCode": 201,
-		})
+		response.Unauthorized(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": user,
-		"status": "success",
-		"statusCode": 200,
-	})
+	response.OK(c, mapper.ToUserResponse(user))
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
@@ -116,7 +92,5 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		SameSite: http.SameSiteNoneMode,
 	})
 
-	c.JSON(http.StatusOK, gin.H{
-		"status": "success",
-	})
+	response.OK(c, nil)
 }

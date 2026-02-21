@@ -12,71 +12,66 @@ import (
 )
 
 type AuthService struct {
-	repo repository.AuthRepository
+	repo      repository.AuthRepository
 	jwtSecret string
 }
 
-func NewAuthService(r repository.AuthRepository,jwtSecret string,) *AuthService {
+func NewAuthService(r repository.AuthRepository, jwtSecret string) *AuthService {
 	return &AuthService{
-		repo: r,
+		repo:      r,
 		jwtSecret: jwtSecret,
 	}
 }
 
-
 func (s *AuthService) Signup(req dto.SignupRequest) (models.User, error) {
-	hashed,err := util.HashPassword(req.Password)
+	hashed, err := util.HashPassword(req.Password)
 	if err != nil {
 		return models.User{}, err
 	}
 	user := models.User{
-		ID: uuid.New(),
-		Username: req.Username,
-		Email: req.Email,
-		Password: hashed,
+		ID:        uuid.New(),
+		Username:  req.Username,
+		Email:     req.Email,
+		Password:  hashed,
 		CreatedAt: time.Now(),
 	}
 	return s.repo.Signup(user)
 }
 
-func (s *AuthService) Login(req dto.LoginRequest) (models.User,string, error)  {
-	user,err := s.repo.FindByEmail(req.Email)
-	if(err != nil){
-		return models.User{},"",err
+func (s *AuthService) Login(req dto.LoginRequest) (models.User, string, error) {
+	user, err := s.repo.FindByEmail(req.Email)
+	if err != nil {
+		return models.User{}, "", err
 	}
 	if !util.CheckPassword(user.Password, req.Password) {
-		return models.User{},"", errors.New("invalid credentials")
+		return models.User{}, "", errors.New("invalid credentials")
 	}
 	token, err := util.GenerateAccessToken(
 		user.ID.String(),
 		s.jwtSecret,
 	)
 	if err != nil {
-		return models.User{},"", err
+		return models.User{}, "", err
 	}
-	return user,token,nil
+	return user, token, nil
 }
 
-func (s *AuthService) Me(token string) (dto.LoginResponse, error) {
+func (s *AuthService) Me(token string) (models.User, error) {
 
 	claims, err := util.VerifyAccessToken(token, s.jwtSecret)
 	if err != nil {
-		return dto.LoginResponse{}, err
+		return models.User{}, err
 	}
 
 	userID, err := uuid.Parse(claims.Subject)
 	if err != nil {
-		return dto.LoginResponse{}, err
+		return models.User{}, err
 	}
 
 	user, err := s.repo.FindByID(userID)
 	if err != nil {
-		return dto.LoginResponse{}, err
+		return models.User{}, err
 	}
 
-	return dto.LoginResponse{
-		ID:       user.ID,
-		Email:    user.Email,
-		Username: user.Username,
-	}, nil
+	return user, nil
 }

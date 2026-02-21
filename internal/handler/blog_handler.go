@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"net/http"
 	"server/internal/dto"
+	"server/internal/mapper"
+	"server/internal/response"
 	"server/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -20,14 +21,10 @@ func NewBlogHandler(s *service.BlogService) *BlogHandler {
 func (h *BlogHandler) GetBlog(c *gin.Context) {
 	blogs, err := h.service.GetBlog()
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		response.Internal(c, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"data": blogs,
-		"status": "success",
-		"statusCode": 200,
-	})
+	response.OK(c, mapper.ToBlogResponseList(blogs))
 }
 
 func (h *BlogHandler) GetBlogByID(c *gin.Context) {
@@ -35,50 +32,44 @@ func (h *BlogHandler) GetBlogByID(c *gin.Context) {
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-    	c.JSON(400, gin.H{"error": "invalid id"})
-    	return
+		response.BadRequest(c, "invalid id")
+		return
 	}
 
 	blog, err := h.service.GetBlogByID(id)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		response.Internal(c, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"data": blog,
-		"status": "success",
-		"statusCode": 200,
-	})
+	response.OK(c, mapper.ToBlogResponse(blog))
 }
 
 func (h *BlogHandler) CreateBlog(c *gin.Context) {
 	var blog dto.CreateBlogRequest
 
 	if err := c.ShouldBindJSON(&blog); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		response.BadRequest(c, err.Error())
 		return
 	}
 
 	userIDStr, exists := c.Get("userID")
-    if !exists {
-        c.JSON(401, gin.H{"error": "unauthorized"})
-        return
-    }
-
-    userID, err := uuid.Parse(userIDStr.(string))
-    if err != nil {
-        c.JSON(400, gin.H{"error": "invalid user id"})
-        return
-    }
-
-	created, err := h.service.CreateBlog(blog,userID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+	if !exists {
+		response.Unauthorized(c, "invalid user id")
 		return
 	}
-	c.JSON(201, created)
+
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		response.BadRequest(c, "invalid user id")
+		return
+	}
+
+	created, err := h.service.CreateBlog(blog, userID)
+	if err != nil {
+		response.Internal(c, err.Error())
+		return
+	}
+	response.Created(c, mapper.ToBlogResponse(created))
 }
 
 func (h *BlogHandler) UpdateBlog(c *gin.Context) {
@@ -87,61 +78,59 @@ func (h *BlogHandler) UpdateBlog(c *gin.Context) {
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-    	c.JSON(400, gin.H{"error": "invalid id"})
-    	return
+		response.BadRequest(c, "invalid id")
+		return
 	}
 
 	if err := c.ShouldBindJSON(&updatedblog); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		response.BadRequest(c, err.Error())
 		return
 	}
 
 	userIDStr, exists := c.Get("userID")
-    if !exists {
-        c.JSON(401, gin.H{"error": "unauthorized"})
-        return
-    }
-
-    userID, err := uuid.Parse(userIDStr.(string))
-    if err != nil {
-        c.JSON(400, gin.H{"error": "invalid user id"})
-        return
-    }
-
-	updated, err := h.service.UpdateBlog(id,updatedblog,userID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+	if !exists {
+		response.Unauthorized(c, "invalid user id")
 		return
 	}
-	c.JSON(200, updated)
-}	
+
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		response.BadRequest(c, "invalid user id")
+		return
+	}
+
+	updated, err := h.service.UpdateBlog(id, updatedblog, userID)
+	if err != nil {
+		response.Internal(c, err.Error())
+		return
+	}
+	response.OK(c, mapper.ToBlogResponse(updated))
+}
 
 func (h *BlogHandler) DeleteBlog(c *gin.Context) {
 	idStr := c.Param("id")
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-    	c.JSON(400, gin.H{"error": "invalid id"})
-    	return
+		response.BadRequest(c, "invalid id")
+		return
 	}
 
 	userIDStr, exists := c.Get("userID")
-    if !exists {
-        c.JSON(401, gin.H{"error": "unauthorized"})
-        return
-    }
-
-    userID, err := uuid.Parse(userIDStr.(string))
-    if err != nil {
-        c.JSON(400, gin.H{"error": "invalid user id"})
-        return
-    }
-
-	if err := h.service.DeleteBlog(id,userID); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+	if !exists {
+		response.Unauthorized(c, "invalid user id")
 		return
 	}
-	c.Status(204)
-}	
+
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		response.BadRequest(c, "invalid user id format")
+		return
+	}
+
+	if err := h.service.DeleteBlog(id, userID); err != nil {
+		response.Internal(c, err.Error())
+		return
+	}
+	response.OK(c, nil)
+}
