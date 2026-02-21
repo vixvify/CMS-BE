@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"server/internal/database"
 	"server/internal/handler"
@@ -10,33 +11,38 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Println("CONFIG NOT FOUND")
+	}
 	database.Connect()
 	jwtSecret := os.Getenv("JWT_SECRET")
 	PORT := os.Getenv("PORT")
-	
+
 	authRepo := infra.NewAuthRepoGorm(database.DB)
-	authService := service.NewAuthService(authRepo,jwtSecret,)
+	authService := service.NewAuthService(authRepo, jwtSecret)
 	authHandler := handler.NewAuthHandler(authService)
 	blogRepo := infra.NewBlogRepoGorm(database.DB)
-	
+
 	blogService := service.NewBlogService(blogRepo)
 	blogHandler := handler.NewBlogHandler(blogService)
-	
+
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://blog-app-go.vercel.app"},
+		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization","Cookie","x-from"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Cookie", "x-from"},
 		AllowCredentials: true,
 	}))
 
 	api := r.Group("/api")
-	route.RegisterBlogRoutes(api.Group("/blog"), blogHandler,jwtSecret)
+	route.RegisterBlogRoutes(api.Group("/blog"), blogHandler, jwtSecret)
 	route.RegisterAuthRoutes(api.Group("/auth"), authHandler)
 
-	r.Run(":"+PORT)
+	r.Run(":" + PORT)
 
 }
